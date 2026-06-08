@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #333; margin-bottom: 10px; text-align: center; }
+        .subtitle { text-align: center; color: #777; margin-bottom: 30px; }
+        .feature-grid {
+            display: grid;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .feature-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .feature-btn:hover { transform: translateY(-2px); }
+        .feature-btn:active { transform: translateY(0); }
+        .output {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            min-height: 100px;
+            font-family: monospace;
+            color: #333;
+        }
+        .status { color: #4caf50; font-weight: bold; }
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            animation: fadeOut 2s ease-out forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; visibility: visible; }
+            80% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Native Bridge Demo</h1>
+        <div class="subtitle">HTML + Java WebView Bridge</div>
+
+        <div class="feature-grid">
+            <button class="feature-btn" onclick="showToast()">🍞 عرض Toast</button>
+            <button class="feature-btn" onclick="vibratePhone()">📳 اهتزاز الهاتف</button>
+            <button class="feature-btn" onclick="getDeviceInfo()">📊 معلومات الجهاز</button>
+            <button class="feature-btn" onclick="openCamera()">📸 فتح الكاميرا</button>
+            <button class="feature-btn" onclick="shareText()">📤 مشاركة نص</button>
+        </div>
+
+        <div class="output">
+            <div id="output">✨ انقر أي زر لتجربة ميزات الهاتف...</div>
+        </div>
+    </div>
+
+    <script>
+        // تحديث الـ output في الصفحة
+        function updateOutput(message, isError = false) {
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = `<span ${isError ? 'style="color:red"' : 'style="color:#4caf50"'}>${message}</span>`;
+        }
+
+        // عرض Toast
+        function showToast() {
+            if (window.AndroidBridge && window.AndroidBridge.showToast) {
+                window.AndroidBridge.showToast("مرحباً من HTML!");
+                updateOutput("🍞 تم عرض Toast بنجاح");
+            } else {
+                updateOutput("❌ الجسر غير متوفر", true);
+            }
+        }
+
+        // اهتزاز
+        function vibratePhone() {
+            if (window.AndroidBridge && window.AndroidBridge.vibrate) {
+                window.AndroidBridge.vibrate(500);
+                updateOutput("📳 تم الاهتزاز لمدة 500ms");
+            } else {
+                updateOutput("❌ الاهتزاز غير مدعوم", true);
+            }
+        }
+
+        // معلومات الجهاز
+        function getDeviceInfo() {
+            if (window.AndroidBridge && window.AndroidBridge.getDeviceInfo) {
+                const info = window.AndroidBridge.getDeviceInfo();
+                updateOutput(`📱 معلومات الجهاز: ${info}`);
+            } else {
+                updateOutput("❌ لا يمكن جلب معلومات الجهاز", true);
+            }
+        }
+
+        // فتح الكاميرا
+        function openCamera() {
+            if (window.AndroidBridge && window.AndroidBridge.openCamera) {
+                window.AndroidBridge.openCamera();
+                updateOutput("📸 جاري فتح الكاميرا...");
+            } else {
+                updateOutput("❌ الكاميرا غير مدعومة", true);
+            }
+        }
+
+        // مشاركة
+        function shareText() {
+            if (window.AndroidBridge && window.AndroidBridge.shareText) {
+                window.AndroidBridge.shareText("تمت المشاركة من تطبيق WebView!");
+                updateOutput("📤 تم فتح قائمة المشاركة");
+            } else {
+                updateOutput("❌ المشاركة غير مدعومة", true);
+            }
+        }
+
+        // استقبال بيانات من الكاميرا (نداء من Java)
+        window.receiveCameraResult = function(imageBase64) {
+            if(imageBase64) {
+                updateOutput("📸 تم التقاط الصورة! (طول البيانات: " + imageBase64.length + " حرف)");
+                // هنا يمكنك عرض الصورة
+            } else {
+                updateOutput("❌ لم يتم التقاط صورة", true);
+            }
+        }
+    </script>
+</body>
+</html>
+
