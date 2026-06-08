@@ -18,7 +18,10 @@ jobs:
         java-version: 17
 
     - name: Build Debug APK
-      run: cd android && ./gradlew assembleDebug
+      run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
 
     - name: Build APK
       run: gradle assembleDebug
